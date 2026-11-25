@@ -7,13 +7,17 @@ export default function ScoreReview() {
   const [rubrics, setRubrics] = useState([]);
   const [scores, setScores] = useState({});
   const [feedback, setFeedback] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(null); // { text, type }
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     api
       .get(`/rubrics/assignment/${assignmentId}`)
-      .then((res) => setRubrics(res.data));
+      .then((res) => setRubrics(res.data))
+      .catch(() => {
+        setMessage({ text: "Could not load the rubric.", type: "error" });
+      });
   }, [assignmentId]);
 
   const handleScoreChange = (rubricId, value) => {
@@ -22,6 +26,8 @@ export default function ScoreReview() {
 
   const submit = async (e) => {
     e.preventDefault();
+    setMessage(null);
+    setSubmitting(true);
     const scoreArray = Object.entries(scores).map(([rubric_id, score]) => ({
       rubric_id: Number(rubric_id),
       score: Number(score),
@@ -32,10 +38,15 @@ export default function ScoreReview() {
         scores: scoreArray,
         feedback,
       });
-      setMessage("Review submitted. Redirecting...");
+      setMessage({ text: "Review submitted. Redirecting...", type: "success" });
       setTimeout(() => navigate("/student"), 1200);
     } catch (err) {
-      setMessage(err.response?.data?.message || "Could not submit review");
+      setMessage({
+        text: err.response?.data?.message || "Could not submit review",
+        type: "error",
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -44,8 +55,14 @@ export default function ScoreReview() {
       <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
         <h1 className="text-xl font-bold mb-4">Score Submission (Anonymous)</h1>
         {message && (
-          <p className="bg-green-100 text-green-700 text-sm p-2 rounded mb-4">
-            {message}
+          <p
+            className={`text-sm p-2 rounded mb-4 ${
+              message.type === "error"
+                ? "bg-rose-50 text-rose-700"
+                : "bg-emerald-50 text-emerald-700"
+            }`}
+          >
+            {message.text}
           </p>
         )}
         <form onSubmit={submit}>
@@ -79,10 +96,10 @@ export default function ScoreReview() {
             required
           />
           <button
-            className="bg-indigo-600 text-white px-4 py-2 rounded w-full"
-            disabled={rubrics.length === 0}
+            className="bg-indigo-600 text-white px-4 py-2 rounded w-full disabled:opacity-60"
+            disabled={rubrics.length === 0 || submitting}
           >
-            Submit Review
+            {submitting ? "Submitting..." : "Submit Review"}
           </button>
         </form>
       </div>

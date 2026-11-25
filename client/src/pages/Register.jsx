@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
+import redirectByRole from "../utils/redirectByRole";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -22,14 +23,7 @@ export default function Register() {
       const res = await api.post("/auth/register", form);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      const role = res.data.user.role;
-      navigate(
-        role === "lecturer"
-          ? "/lecturer"
-          : role === "admin"
-            ? "/admin"
-            : "/student",
-      );
+      navigate(redirectByRole(res.data.user.role));
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
     }
@@ -77,7 +71,6 @@ export default function Register() {
         >
           <option value="student">Student</option>
           <option value="lecturer">Lecturer</option>
-          <option value="admin">Admin</option>
         </select>
         <button
           type="submit"

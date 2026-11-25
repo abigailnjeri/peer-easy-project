@@ -17,16 +17,28 @@ export default function LecturerDashboard() {
     criterion: "",
     max_score: 10,
   });
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(null); // { text, type }
+  const [submittingCourse, setSubmittingCourse] = useState(false);
+  const [submittingAssignment, setSubmittingAssignment] = useState(false);
+  const [submittingRubric, setSubmittingRubric] = useState(false);
   const navigate = useNavigate();
 
+  const flash = (text, type = "success") => setMessage({ text, type });
+
   const loadData = async () => {
-    const [c, a] = await Promise.all([
-      api.get("/courses/mine"),
-      api.get("/assignments"),
-    ]);
-    setCourses(c.data);
-    setAssignments(a.data);
+    try {
+      const [c, a] = await Promise.all([
+        api.get("/courses/mine"),
+        api.get("/assignments"),
+      ]);
+      setCourses(c.data);
+      setAssignments(a.data);
+    } catch (err) {
+      flash(
+        err.response?.data?.message || "Could not load dashboard data.",
+        "error",
+      );
+    }
   };
 
   useEffect(() => {
@@ -35,39 +47,74 @@ export default function LecturerDashboard() {
 
   const createCourse = async (e) => {
     e.preventDefault();
-    await api.post("/courses", courseForm);
-    setCourseForm({ name: "", code: "" });
-    setMessage("Course created.");
-    loadData();
+    if (submittingCourse) return;
+    setSubmittingCourse(true);
+    setMessage(null);
+    try {
+      await api.post("/courses", courseForm);
+      setCourseForm({ name: "", code: "" });
+      flash("Course created.");
+      await loadData();
+    } catch (err) {
+      flash(err.response?.data?.message || "Could not create course.", "error");
+    } finally {
+      setSubmittingCourse(false);
+    }
   };
 
   const createAssignment = async (e) => {
     e.preventDefault();
-    await api.post("/assignments", assignmentForm);
-    setAssignmentForm({
-      course_id: "",
-      title: "",
-      description: "",
-      due_date: "",
-    });
-    setMessage("Assignment created.");
-    loadData();
+    if (submittingAssignment) return;
+    setSubmittingAssignment(true);
+    setMessage(null);
+    try {
+      await api.post("/assignments", assignmentForm);
+      setAssignmentForm({
+        course_id: "",
+        title: "",
+        description: "",
+        due_date: "",
+      });
+      flash("Assignment created.");
+      await loadData();
+    } catch (err) {
+      flash(
+        err.response?.data?.message || "Could not create assignment.",
+        "error",
+      );
+    } finally {
+      setSubmittingAssignment(false);
+    }
   };
 
   const addRubric = async (e) => {
     e.preventDefault();
-    await api.post("/rubrics", rubricForm);
-    setMessage(`Rubric criterion "${rubricForm.criterion}" added.`);
-    setRubricForm({ ...rubricForm, criterion: "" });
+    if (submittingRubric) return;
+    setSubmittingRubric(true);
+    setMessage(null);
+    try {
+      await api.post("/rubrics", rubricForm);
+      flash(`Rubric criterion "${rubricForm.criterion}" added.`);
+      setRubricForm({ ...rubricForm, criterion: "" });
+    } catch (err) {
+      flash(
+        err.response?.data?.message || "Could not add rubric criterion.",
+        "error",
+      );
+    } finally {
+      setSubmittingRubric(false);
+    }
   };
 
   const allocate = async (assignmentId) => {
+    setMessage(null);
     try {
       await api.post(`/reviews/allocate/${assignmentId}`);
-      setMessage("Reviewers allocated for this assignment.");
+      flash("Reviewers allocated for this assignment.");
     } catch (err) {
-      setMessage(
+      flash(
         err.response?.data?.message || "Could not allocate reviewers yet.",
+        "error",
       );
     }
   };
@@ -88,8 +135,14 @@ export default function LecturerDashboard() {
         </div>
 
         {message && (
-          <p className="bg-green-100 text-green-700 text-sm p-2 rounded mb-4">
-            {message}
+          <p
+            className={`text-sm p-2 rounded mb-4 ${
+              message.type === "error"
+                ? "bg-rose-50 text-rose-700"
+                : "bg-emerald-50 text-emerald-700"
+            }`}
+          >
+            {message.text}
           </p>
         )}
 
@@ -117,8 +170,11 @@ export default function LecturerDashboard() {
               className="w-full border rounded px-3 py-2 mb-2"
               required
             />
-            <button className="bg-indigo-600 text-white px-4 py-2 rounded">
-              Create Course
+            <button
+              disabled={submittingCourse}
+              className="bg-indigo-600 text-white px-4 py-2 rounded disabled:opacity-60"
+            >
+              {submittingCourse ? "Creating..." : "Create Course"}
             </button>
           </form>
 
@@ -176,8 +232,11 @@ export default function LecturerDashboard() {
               }
               className="w-full border rounded px-3 py-2 mb-2"
             />
-            <button className="bg-indigo-600 text-white px-4 py-2 rounded">
-              Create Assignment
+            <button
+              disabled={submittingAssignment}
+              className="bg-indigo-600 text-white px-4 py-2 rounded disabled:opacity-60"
+            >
+              {submittingAssignment ? "Creating..." : "Create Assignment"}
             </button>
           </form>
         </div>
@@ -220,8 +279,11 @@ export default function LecturerDashboard() {
             }
             className="w-full border rounded px-3 py-2 mb-2"
           />
-          <button className="bg-indigo-600 text-white px-4 py-2 rounded">
-            Add Criterion
+          <button
+            disabled={submittingRubric}
+            className="bg-indigo-600 text-white px-4 py-2 rounded disabled:opacity-60"
+          >
+            {submittingRubric ? "Adding..." : "Add Criterion"}
           </button>
         </form>
 
