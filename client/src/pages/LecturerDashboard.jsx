@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import Layout from "../components/Layout";
+
+const NAV = [{ key: "dashboard", label: "Dashboard", icon: "🏠" }];
+const card = "bg-white rounded-2xl shadow-sm border border-midnight/5 p-6";
 
 export default function LecturerDashboard() {
   const [courses, setCourses] = useState([]);
@@ -17,11 +20,10 @@ export default function LecturerDashboard() {
     criterion: "",
     max_score: 10,
   });
-  const [message, setMessage] = useState(null); // { text, type }
+  const [message, setMessage] = useState(null);
   const [submittingCourse, setSubmittingCourse] = useState(false);
   const [submittingAssignment, setSubmittingAssignment] = useState(false);
   const [submittingRubric, setSubmittingRubric] = useState(false);
-  const navigate = useNavigate();
 
   const flash = (text, type = "success") => setMessage({ text, type });
 
@@ -119,139 +121,124 @@ export default function LecturerDashboard() {
     }
   };
 
-  const logout = () => {
-    localStorage.clear();
-    navigate("/login");
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">PeerEasy — Lecturer Dashboard</h1>
-          <button onClick={logout} className="text-sm text-red-500">
-            Log Out
-          </button>
-        </div>
-
-        {message && (
-          <p
-            className={`text-sm p-2 rounded mb-4 ${
-              message.type === "error"
-                ? "bg-rose-50 text-rose-700"
-                : "bg-emerald-50 text-emerald-700"
-            }`}
-          >
-            {message.text}
-          </p>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <form
-            onSubmit={createCourse}
-            className="bg-white p-4 rounded-xl shadow"
-          >
-            <h2 className="font-semibold mb-3">Create Course</h2>
-            <input
-              placeholder="Course name"
-              value={courseForm.name}
-              onChange={(e) =>
-                setCourseForm({ ...courseForm, name: e.target.value })
-              }
-              className="w-full border rounded px-3 py-2 mb-2"
-              required
-            />
-            <input
-              placeholder="Course code (e.g. SWE3090A)"
-              value={courseForm.code}
-              onChange={(e) =>
-                setCourseForm({ ...courseForm, code: e.target.value })
-              }
-              className="w-full border rounded px-3 py-2 mb-2"
-              required
-            />
-            <button
-              disabled={submittingCourse}
-              className="bg-indigo-600 text-white px-4 py-2 rounded disabled:opacity-60"
-            >
-              {submittingCourse ? "Creating..." : "Create Course"}
-            </button>
-          </form>
-
-          <form
-            onSubmit={createAssignment}
-            className="bg-white p-4 rounded-xl shadow"
-          >
-            <h2 className="font-semibold mb-3">Create Assignment</h2>
-            <select
-              value={assignmentForm.course_id}
-              onChange={(e) =>
-                setAssignmentForm({
-                  ...assignmentForm,
-                  course_id: e.target.value,
-                })
-              }
-              className="w-full border rounded px-3 py-2 mb-2"
-              required
-            >
-              <option value="">Select course</option>
-              {courses.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.code})
-                </option>
-              ))}
-            </select>
-            <input
-              placeholder="Title"
-              value={assignmentForm.title}
-              onChange={(e) =>
-                setAssignmentForm({ ...assignmentForm, title: e.target.value })
-              }
-              className="w-full border rounded px-3 py-2 mb-2"
-              required
-            />
-            <textarea
-              placeholder="Description"
-              value={assignmentForm.description}
-              onChange={(e) =>
-                setAssignmentForm({
-                  ...assignmentForm,
-                  description: e.target.value,
-                })
-              }
-              className="w-full border rounded px-3 py-2 mb-2"
-            />
-            <input
-              type="date"
-              value={assignmentForm.due_date}
-              onChange={(e) =>
-                setAssignmentForm({
-                  ...assignmentForm,
-                  due_date: e.target.value,
-                })
-              }
-              className="w-full border rounded px-3 py-2 mb-2"
-            />
-            <button
-              disabled={submittingAssignment}
-              className="bg-indigo-600 text-white px-4 py-2 rounded disabled:opacity-60"
-            >
-              {submittingAssignment ? "Creating..." : "Create Assignment"}
-            </button>
-          </form>
-        </div>
-
-        <form
-          onSubmit={addRubric}
-          className="bg-white p-4 rounded-xl shadow mb-6"
+    <Layout
+      nav={NAV}
+      active="dashboard"
+      onNav={() => {}}
+      title="Lecturer Dashboard"
+      subtitle="Manage your courses, assignments and rubrics"
+    >
+      {message && (
+        <div
+          className={`text-sm p-3.5 rounded-lg mb-6 font-medium border ${message.type === "error" ? "bg-red-50 text-red-700 border-red-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"}`}
         >
-          <h2 className="font-semibold mb-3">Add Rubric Criterion</h2>
+          {message.text}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <form onSubmit={createCourse} className={card}>
+          <h2 className="font-bold text-lg text-midnight mb-4">
+            Create Course
+          </h2>
+          <input
+            placeholder="Course name"
+            value={courseForm.name}
+            onChange={(e) =>
+              setCourseForm({ ...courseForm, name: e.target.value })
+            }
+            className="w-full border border-bluegrey/30 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta mb-3 bg-cream/30 focus:bg-white transition-colors"
+            required
+          />
+          <input
+            placeholder="Course code (e.g. SWE3090A)"
+            value={courseForm.code}
+            onChange={(e) =>
+              setCourseForm({ ...courseForm, code: e.target.value })
+            }
+            className="w-full border border-bluegrey/30 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta mb-4 bg-cream/30 focus:bg-white transition-colors"
+            required
+          />
+          <button
+            disabled={submittingCourse}
+            className="bg-terracotta text-white px-5 py-2.5 rounded-lg font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-60 shadow-sm shadow-terracotta/20"
+          >
+            {submittingCourse ? "Creating..." : "Create Course"}
+          </button>
+        </form>
+
+        <form onSubmit={createAssignment} className={card}>
+          <h2 className="font-bold text-lg text-midnight mb-4">
+            Create Assignment
+          </h2>
+          <select
+            value={assignmentForm.course_id}
+            onChange={(e) =>
+              setAssignmentForm({
+                ...assignmentForm,
+                course_id: e.target.value,
+              })
+            }
+            className="w-full border border-bluegrey/30 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta mb-3 bg-cream/30 focus:bg-white transition-colors cursor-pointer"
+            required
+          >
+            <option value="">Select course</option>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name} ({c.code})
+              </option>
+            ))}
+          </select>
+          <input
+            placeholder="Title"
+            value={assignmentForm.title}
+            onChange={(e) =>
+              setAssignmentForm({ ...assignmentForm, title: e.target.value })
+            }
+            className="w-full border border-bluegrey/30 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta mb-3 bg-cream/30 focus:bg-white transition-colors"
+            required
+          />
+          <textarea
+            placeholder="Description"
+            value={assignmentForm.description}
+            onChange={(e) =>
+              setAssignmentForm({
+                ...assignmentForm,
+                description: e.target.value,
+              })
+            }
+            className="w-full border border-bluegrey/30 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta mb-3 bg-cream/30 focus:bg-white transition-colors resize-none"
+            rows="2"
+          />
+          <input
+            type="date"
+            value={assignmentForm.due_date}
+            onChange={(e) =>
+              setAssignmentForm({ ...assignmentForm, due_date: e.target.value })
+            }
+            className="w-full border border-bluegrey/30 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta mb-4 bg-cream/30 focus:bg-white transition-colors cursor-pointer"
+          />
+          <button
+            disabled={submittingAssignment}
+            className="bg-terracotta text-white px-5 py-2.5 rounded-lg font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-60 shadow-sm shadow-terracotta/20"
+          >
+            {submittingAssignment ? "Creating..." : "Create Assignment"}
+          </button>
+        </form>
+      </div>
+
+      <form onSubmit={addRubric} className={`${card} mb-6`}>
+        <h2 className="font-bold text-lg text-midnight mb-4">
+          Add Rubric Criterion
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <select
             value={rubricForm.assignment_id}
             onChange={(e) =>
               setRubricForm({ ...rubricForm, assignment_id: e.target.value })
             }
-            className="w-full border rounded px-3 py-2 mb-2"
+            className="w-full border border-bluegrey/30 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta bg-cream/30 focus:bg-white transition-colors cursor-pointer"
             required
           >
             <option value="">Select assignment</option>
@@ -267,7 +254,7 @@ export default function LecturerDashboard() {
             onChange={(e) =>
               setRubricForm({ ...rubricForm, criterion: e.target.value })
             }
-            className="w-full border rounded px-3 py-2 mb-2"
+            className="w-full border border-bluegrey/30 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta bg-cream/30 focus:bg-white transition-colors"
             required
           />
           <input
@@ -277,44 +264,42 @@ export default function LecturerDashboard() {
             onChange={(e) =>
               setRubricForm({ ...rubricForm, max_score: e.target.value })
             }
-            className="w-full border rounded px-3 py-2 mb-2"
+            className="w-full border border-bluegrey/30 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta bg-cream/30 focus:bg-white transition-colors"
           />
-          <button
-            disabled={submittingRubric}
-            className="bg-indigo-600 text-white px-4 py-2 rounded disabled:opacity-60"
-          >
-            {submittingRubric ? "Adding..." : "Add Criterion"}
-          </button>
-        </form>
-
-        <div className="bg-white p-4 rounded-xl shadow">
-          <h2 className="font-semibold mb-3">My Assignments</h2>
-          <ul className="space-y-2">
-            {assignments.map((a) => (
-              <li
-                key={a.id}
-                className="flex justify-between items-center border-b pb-2"
-              >
-                <span>
-                  {a.title}{" "}
-                  <span className="text-gray-400 text-sm">
-                    ({a.course_name})
-                  </span>
-                </span>
-                <button
-                  onClick={() => allocate(a.id)}
-                  className="text-sm bg-amber-500 text-white px-3 py-1 rounded"
-                >
-                  Allocate Reviewers
-                </button>
-              </li>
-            ))}
-            {assignments.length === 0 && (
-              <p className="text-gray-400 text-sm">No assignments yet.</p>
-            )}
-          </ul>
         </div>
+        <button
+          disabled={submittingRubric}
+          className="bg-terracotta text-white px-5 py-2.5 rounded-lg font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-60 shadow-sm shadow-terracotta/20"
+        >
+          {submittingRubric ? "Adding..." : "Add Criterion"}
+        </button>
+      </form>
+
+      <div className={card}>
+        <h2 className="font-bold text-lg text-midnight mb-4">My Assignments</h2>
+        <ul className="divide-y divide-cream">
+          {assignments.map((a) => (
+            <li
+              key={a.id}
+              className="py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 first:pt-0 last:pb-0"
+            >
+              <div>
+                <p className="font-semibold text-midnight">{a.title}</p>
+                <p className="text-sm text-bluegrey mt-0.5">{a.course_name}</p>
+              </div>
+              <button
+                onClick={() => allocate(a.id)}
+                className="text-sm bg-midnight text-white px-4 py-2 rounded-lg hover:bg-midnight/90 transition-colors shadow-sm"
+              >
+                Allocate Reviewers
+              </button>
+            </li>
+          ))}
+          {assignments.length === 0 && (
+            <p className="text-bluegrey text-sm py-4">No assignments yet.</p>
+          )}
+        </ul>
       </div>
-    </div>
+    </Layout>
   );
 }

@@ -7,11 +7,12 @@ const NAV = [
   { key: "overview", label: "Overview", icon: "📊" },
   { key: "users", label: "User Management", icon: "👥" },
 ];
-const card = "bg-white rounded-2xl shadow-sm border border-slate-100 p-5";
+const card = "bg-white rounded-2xl shadow-sm border border-midnight/5 p-6";
+
 const ROLE_TONE = {
-  student: "bg-indigo-50 text-indigo-700",
-  lecturer: "bg-amber-50 text-amber-700",
-  admin: "bg-rose-50 text-rose-700",
+  student: "bg-bluegrey/10 text-midnight font-medium",
+  lecturer: "bg-coral/20 text-terracotta font-medium",
+  admin: "bg-terracotta/10 text-terracotta font-medium",
 };
 
 export default function AdminDashboard() {
@@ -77,7 +78,11 @@ export default function AdminDashboard() {
     >
       {message && (
         <div
-          className={`text-sm p-3 rounded-lg mb-5 ${message.type === "error" ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700"}`}
+          className={`text-sm p-3.5 rounded-lg mb-6 font-medium border ${
+            message.type === "error"
+              ? "bg-red-50 text-red-700 border-red-100"
+              : "bg-emerald-50 text-emerald-700 border-emerald-100"
+          }`}
         >
           {message.text}
         </div>
@@ -85,74 +90,84 @@ export default function AdminDashboard() {
 
       {tab === "overview" && stats && (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
             <StatCard
               label="Total users"
               value={stats.users}
               icon="👥"
-              tone="indigo"
+              tone="bluegrey"
             />
             <StatCard
               label="Courses"
               value={stats.courses}
               icon="📚"
-              tone="pink"
+              tone="terracotta"
             />
             <StatCard
               label="Assignments"
               value={stats.assignments}
               icon="📝"
-              tone="amber"
+              tone="coral"
             />
             <StatCard
               label="Submissions"
               value={stats.submissions}
               icon="📥"
-              tone="green"
+              tone="terracotta"
             />
             <StatCard
               label="Reviews done"
               value={stats.reviews}
               icon="✅"
-              tone="slate"
+              tone="midnight"
             />
           </div>
-          <div className="grid md:grid-cols-2 gap-5">
+
+          <div className="grid md:grid-cols-2 gap-6">
             <div className={card}>
-              <h2 className="font-semibold mb-4">Users by role</h2>
-              {[
-                ["Students", stats.students, "from-indigo-500 to-violet-500"],
-                ["Lecturers", stats.lecturers, "from-amber-500 to-orange-500"],
-                ["Admins", stats.admins, "from-rose-500 to-pink-500"],
-              ].map(([label, n, grad]) => (
-                <div key={label} className="mb-3">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>{label}</span>
-                    <span>{n}</span>
+              <h2 className="font-bold text-lg text-midnight mb-5">
+                Users by role
+              </h2>
+              <div className="space-y-5">
+                {[
+                  ["Students", stats.students, "bg-bluegrey"],
+                  ["Lecturers", stats.lecturers, "bg-coral"],
+                  ["Admins", stats.admins, "bg-terracotta"],
+                ].map(([label, n, barColor]) => (
+                  <div key={label}>
+                    <div className="flex justify-between text-sm mb-1.5 font-medium text-midnight">
+                      <span>{label}</span>
+                      <span>{n}</span>
+                    </div>
+                    <div className="h-2.5 bg-cream rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${barColor}`}
+                        style={{ width: `${bar(n)}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-2.5 bg-slate-100 rounded-full">
-                    <div
-                      className={`h-2.5 rounded-full bg-gradient-to-r ${grad}`}
-                      style={{ width: `${bar(n)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
+
             <div className={card}>
-              <h2 className="font-semibold mb-4">Newest users</h2>
-              <div className="space-y-3">
+              <h2 className="font-bold text-lg text-midnight mb-5">
+                Newest users
+              </h2>
+              <div className="space-y-4">
                 {users.slice(0, 5).map((u) => (
                   <div
                     key={u.id}
-                    className="flex items-center justify-between text-sm"
+                    className="flex items-center justify-between text-sm border-b border-cream pb-3 last:border-0 last:pb-0"
                   >
                     <div>
-                      <p className="font-medium">{u.full_name}</p>
-                      <p className="text-xs text-slate-400">{u.email}</p>
+                      <p className="font-semibold text-midnight">
+                        {u.full_name}
+                      </p>
+                      <p className="text-xs text-bluegrey mt-0.5">{u.email}</p>
                     </div>
                     <span
-                      className={`text-xs px-2.5 py-1 rounded-full capitalize ${ROLE_TONE[u.role]}`}
+                      className={`text-[11px] px-2.5 py-1 rounded-full capitalize ${ROLE_TONE[u.role]}`}
                     >
                       {u.role}
                     </span>
@@ -166,40 +181,51 @@ export default function AdminDashboard() {
 
       {tab === "users" && (
         <div className={card}>
-          <input
-            placeholder="Search by name, email or role…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full md:w-80 border border-slate-200 rounded-lg px-3 py-2 text-sm mb-4"
-          />
+          <div className="mb-6">
+            <input
+              placeholder="Search by name, email or role…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full md:w-96 border border-bluegrey/30 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors bg-cream/30 focus:bg-white"
+            />
+          </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm text-left">
               <thead>
-                <tr className="text-left text-xs text-slate-400 border-b">
-                  <th className="py-2">Name</th>
-                  <th>Email</th>
-                  <th>Joined</th>
-                  <th>Role</th>
+                <tr className="text-xs text-bluegrey uppercase tracking-wider border-b border-cream">
+                  <th className="pb-3 font-semibold">Name</th>
+                  <th className="pb-3 font-semibold">Email</th>
+                  <th className="pb-3 font-semibold">Joined</th>
+                  <th className="pb-3 font-semibold text-right">Role</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-cream">
                 {filtered.map((u) => (
-                  <tr key={u.id} className="border-b">
-                    <td className="py-3 font-medium">{u.full_name}</td>
-                    <td className="text-slate-500">{u.email}</td>
-                    <td className="text-slate-500">
-                      {new Date(u.created_at).toLocaleDateString()}
+                  <tr
+                    key={u.id}
+                    className="hover:bg-cream/30 transition-colors"
+                  >
+                    <td className="py-3.5 font-medium text-midnight">
+                      {u.full_name}
                     </td>
-                    <td>
+                    <td className="text-bluegrey">{u.email}</td>
+                    <td className="text-bluegrey">
+                      {new Date(u.created_at).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </td>
+                    <td className="text-right">
                       <select
                         value={u.role}
                         disabled={u.id === me.id}
                         onChange={(e) => changeRole(u.id, e.target.value)}
-                        className={`text-xs rounded-full px-2.5 py-1 border-0 capitalize ${ROLE_TONE[u.role]} disabled:opacity-60`}
+                        className={`text-xs rounded-full px-3 py-1.5 border-0 capitalize cursor-pointer focus:ring-2 focus:ring-terracotta focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${ROLE_TONE[u.role]}`}
                       >
-                        <option value="student">student</option>
-                        <option value="lecturer">lecturer</option>
-                        <option value="admin">admin</option>
+                        <option value="student">Student</option>
+                        <option value="lecturer">Lecturer</option>
+                        <option value="admin">Admin</option>
                       </select>
                     </td>
                   </tr>

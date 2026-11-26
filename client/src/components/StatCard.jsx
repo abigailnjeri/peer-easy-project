@@ -1,24 +1,24 @@
 const TONES = {
-  indigo: "from-indigo-500 to-violet-500",
-  pink: "from-pink-500 to-rose-500",
-  green: "from-emerald-500 to-teal-500",
-  amber: "from-amber-500 to-orange-500",
-  slate: "from-slate-700 to-slate-900",
+  midnight: "bg-midnight/5 text-midnight",
+  terracotta: "bg-terracotta/10 text-terracotta",
+  coral: "bg-coral/20 text-terracotta",
+  bluegrey: "bg-bluegrey/15 text-bluegrey",
+  cream: "bg-white text-midnight",
 };
 
-export default function StatCard({ label, value, icon, tone = "indigo" }) {
+export default function StatCard({ label, value, icon, tone = "terracotta" }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex items-center gap-4">
+    <div className="bg-white rounded-2xl shadow-sm border border-midnight/5 p-5 flex items-center gap-4 transition-transform hover:-translate-y-0.5 duration-200">
       <div
-        className={`h-12 w-12 rounded-xl bg-gradient-to-br ${TONES[tone]} text-white text-xl flex items-center justify-center shadow`}
+        className={`h-12 w-12 rounded-xl flex items-center justify-center text-xl shadow-sm ${TONES[tone] || TONES.terracotta}`}
       >
         {icon}
       </div>
       <div>
-        <p className="text-2xl font-bold text-slate-900 leading-none">
-          {value}
+        <p className="text-3xl font-bold text-midnight leading-none">{value}</p>
+        <p className="text-xs text-bluegrey mt-1.5 font-medium uppercase tracking-wider">
+          {label}
         </p>
-        <p className="text-xs text-slate-500 mt-1">{label}</p>
       </div>
     </div>
   );
