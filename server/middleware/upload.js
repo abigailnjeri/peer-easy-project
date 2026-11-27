@@ -1,8 +1,6 @@
 const multer = require("multer");
 const path = require("path");
 
-// Stores uploaded files on local disk in /server/uploads,
-// matching the proposal's "local server storage in development" choice.
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, "..", "uploads"));

@@ -1,8 +1,5 @@
 const db = require("../config/db");
 
-// Round-robin allocation: each submission is reviewed by the author of the NEXT
-// submission (wrapping around), so nobody ever reviews their own work.
-// Guard: an assignment can only be allocated once (prevents duplicate allocations).
 exports.allocateReviewers = async (req, res) => {
   try {
     const { assignmentId } = req.params;
@@ -45,7 +42,6 @@ exports.allocateReviewers = async (req, res) => {
   }
 };
 
-// Reviewer's to-do list. Author identity is never returned (anonymity).
 exports.getMyAssignedReviews = async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -66,7 +62,6 @@ exports.getMyAssignedReviews = async (req, res) => {
   }
 };
 
-// Expects: { allocation_id, scores: [{ rubric_id, score }], feedback }
 exports.submitReview = async (req, res) => {
   try {
     const { allocation_id, scores, feedback } = req.body;
@@ -92,7 +87,6 @@ exports.submitReview = async (req, res) => {
         .json({ message: "You have already submitted this review" });
     }
 
-    // Validate every score against the rubric's max score
     const [rubricRows] = await db.query(
       "SELECT id, max_score FROM rubrics WHERE assignment_id = ?",
       [allocation.assignment_id],
@@ -140,7 +134,6 @@ exports.submitReview = async (req, res) => {
   }
 };
 
-// Lecturer/admin: all review rows for an assignment (names visible to staff only)
 exports.getReviewsForAssignment = async (req, res) => {
   try {
     const { assignmentId } = req.params;
@@ -163,8 +156,6 @@ exports.getReviewsForAssignment = async (req, res) => {
   }
 };
 
-// Student: feedback received on THEIR submissions. Reviewer identity is stripped
-// before sending, so anonymity holds all the way to the student's screen.
 exports.getReceivedFeedback = async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -202,7 +193,7 @@ exports.getReceivedFeedback = async (req, res) => {
       });
     });
 
-    res.json(Object.values(grouped)); // reviewer_id is never included
+    res.json(Object.values(grouped));
   } catch (err) {
     console.error("Get received feedback error:", err);
     res.status(500).json({ message: "Server error fetching feedback" });

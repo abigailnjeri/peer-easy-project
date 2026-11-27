@@ -1,6 +1,5 @@
 const db = require("../config/db");
 
-// Student submits a project for an assignment, with an uploaded file
 exports.createSubmission = async (req, res) => {
   try {
     const { assignment_id, description } = req.body;
@@ -15,20 +14,17 @@ exports.createSubmission = async (req, res) => {
       [assignment_id, req.user.id, description || null, filePath],
     );
 
-    res
-      .status(201)
-      .json({
-        message: "Submission received",
-        id: result.insertId,
-        file_path: filePath,
-      });
+    res.status(201).json({
+      message: "Submission received",
+      id: result.insertId,
+      file_path: filePath,
+    });
   } catch (err) {
     console.error("Create submission error:", err);
     res.status(500).json({ message: "Server error creating submission" });
   }
 };
 
-// Student sees only their own submissions
 exports.getMySubmissions = async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -45,7 +41,6 @@ exports.getMySubmissions = async (req, res) => {
   }
 };
 
-// Lecturer sees all submissions for one of their assignments
 exports.getSubmissionsForAssignment = async (req, res) => {
   try {
     const { assignmentId } = req.params;
